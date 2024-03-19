@@ -14,10 +14,14 @@ custom_shell_1.c
 ## Instructions for compiling your programs/scripts;  
 
 ### Step 1:  
-git clone https://github.com/SelX19/OS_shell.git  
+```
+git clone https://github.com/SelX19/OS_shell.git 
+```  
 ### Step 2:  
 Check if the C code is compiled, if not you need to compile it. We reccomend using this command:  
-gcc -Wall -o "filenameYouWant" "custom_shell_1.c"  
+```
+gcc -Wall -o "filenameYouWant" "custom_shell_1.c" 
+```  
 
 If you are on windows you will need to install the gcc/mingw and compile the code into an .exe:  
 gcc -Wall -o "filenameYouWant.exe" "custom_shell_1.c"   
