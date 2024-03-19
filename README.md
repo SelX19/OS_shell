@@ -15,10 +15,10 @@ void *mmap(void *address, size_t length, int protect, int flags, int filedes, of
 * length - The bytes’ number is mapped.
 * protect - It controls what type of access is allowed. For instance, the PROT_READ for reading access, the PROT_WRITE for write access, and the PROT_EXEC for execution.
 * flags - It is used for controlling the map’s nature. Some of the common and useful flags are listed below:
-- MAP_SHARED - share mapping with other processes.
-- MAP_FIXED - The system is forced to use the same mapping address given via the address parameter.
-- MAP_ANONYMOUS / MAP_ANON - It creates anonymous mapping.
-- MAP_PRIVATE - The mapping would be private and not visible to others while using this flag.
+    * MAP_SHARED - share mapping with other processes.
+    * MAP_FIXED - The system is forced to use the same mapping address given via the address parameter.
+    * MAP_ANONYMOUS / MAP_ANON - It creates anonymous mapping.
+    * MAP_PRIVATE - The mapping would be private and not visible to others while using this flag.
 * filedes - The file descriptor is supposed to be mapped.
 * offset - The file mapping starts from this offset.  
 
@@ -27,7 +27,8 @@ During a context switch, the operating system saves the state of a process or th
   
 #### Question 1.5.3: What is the output of the following code snippet? You are given that the exec system call in the child does not succeed.
 The output of the code will be:
-> child
+> child  
+
 > parent
 
 
