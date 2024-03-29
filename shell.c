@@ -1,5 +1,3 @@
-//  Created by Selma Djozic, and Idris Hasanovic on 15/3/24.
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,6 +23,7 @@ void parse_command(char *command, char **args)
 }
 
 // Built-in functions
+
 void cd(char **args)
 {
     if (args[1] == NULL)
@@ -46,14 +45,39 @@ void exit_shell()
     exit(0);
 }
 
+void list_files(char **args)
+{
+    pid_t pid = fork();
+    if (pid == 0)
+    {
+        // Child process
+        execlp("ls", "ls", args[1], NULL);
+        perror("execlp");
+        exit(EXIT_FAILURE);
+    }
+    else if (pid < 0)
+    {
+        // Error forking
+        perror("fork");
+    }
+    else
+    {
+        // Parent process
+        int status;
+        waitpid(pid, &status, 0);
+    }
+}
+
 // Mapping of built-in functions to their names
 char *built_in_function_names[] = {
     "cd",
-    "exit"};
+    "exit",
+    "ls"};
 
 void (*built_in_functions[])(char **) = {
     &cd,
-    &exit_shell};
+    &exit_shell,
+    &list_files};
 
 int main(void)
 {
@@ -119,3 +143,4 @@ int main(void)
 
     return 0;
 }
+
