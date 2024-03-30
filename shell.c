@@ -4,6 +4,16 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
+// defining ANSI color codes
+
+#define ANSI_COLOR_RED "\x1b[31m"
+#define ANSI_COLOR_GREEN "\x1b[32m"
+#define ANSI_COLOR_YELLOW "\x1b[33m"
+#define ANSI_COLOR_BLUE "\x1b[34m"
+#define ANSI_COLOR_MAGENTA "\x1b[35m"
+#define ANSI_COLOR_CYAN "\x1b[36m"
+#define ANSI_COLOR_RESET "\x1b[0m"
+
 #define MAX_COMMAND_LENGTH 1024
 #define MAX_ARGS 64
 
@@ -28,7 +38,7 @@ void cd(char **args)
 {
     if (args[1] == NULL)
     {
-        fprintf(stderr, "Usage: cd [directory]\n");
+        fprintf(stderr, ANSI_COLOR_GREEN "Usage: cd [directory]\n" ANSI_COLOR_RESET);
     }
     else
     {
@@ -41,7 +51,7 @@ void cd(char **args)
 
 void exit_shell()
 {
-    printf("Exiting shell.\n");
+    printf(ANSI_COLOR_GREEN "Exiting shell.\n" ANSI_COLOR_RESET);
     exit(0);
 }
 
@@ -52,13 +62,13 @@ void list_files(char **args)
     {
         // Child process
         execlp("ls", "ls", args[1], NULL);
-        perror("execlp");
+        perror(ANSI_COLOR_RED "execlp" ANSI_COLOR_RESET);
         exit(EXIT_FAILURE);
     }
     else if (pid < 0)
     {
         // Error forking
-        perror("fork");
+        perror(ANSI_COLOR_RED "fork" ANSI_COLOR_RESET);
     }
     else
     {
@@ -81,12 +91,15 @@ void (*built_in_functions[])(char **) = {
 
 int main(void)
 {
+    printf("\n");
+    printf(ANSI_COLOR_YELLOW "Welcome to our Shell\n" ANSI_COLOR_RESET);
+
     char command[MAX_COMMAND_LENGTH];
     char *args[MAX_ARGS];
 
     while (1)
     {
-        printf("$ ");
+        printf(ANSI_COLOR_YELLOW "$ " ANSI_COLOR_RESET);
         fflush(stdout);
 
         if (fgets(command, sizeof(command), stdin) == NULL)
@@ -118,29 +131,53 @@ int main(void)
         {
             // Not a built-in function, execute as external command
             pid_t pid = fork();
+            // fokring(creating)a child process
             if (pid == 0)
             {
-                // Child process
-                if (execvp(args[0], args) == -1)
-                {
-                    perror("execvp");
-                }
-                exit(EXIT_FAILURE);
+                // a child process
+                printf(ANSI_COLOR_GREEN "Child process with a PID = %d\n" ANSI_COLOR_RESET, getpid());
+
+                // replacing a current process image with a new program; executing ls command with -l option for executing long files
+
+                char *args[] = {"ls", "-l", NULL};
+                execv("bin/ls", args);
+                // execv takes path to the given command as an argument, and an array of a command with its options as another argument
+
+                // execv() will not return unless an error occurs
+                perror(ANSI_COLOR_RED "execv" ANSI_COLOR_RESET);
+                exit(1);
             }
             else if (pid < 0)
             {
-                // Error forking
-                perror("fork");
+                // Error when attempting to fork/create a child process
+                perror(ANSI_COLOR_RED "fork" ANSI_COLOR_RESET);
+                exit(1);
             }
             else
             {
                 // Parent process
+
+                printf(ANSI_COLOR_GREEN "Parent process with a PID = %d" ANSI_COLOR_RESET, getpid());
+
+                // wait for the child process to terminate
                 int status;
-                waitpid(pid, &status, 0);
+                wait(&status);
+
+                printf(ANSI_COLOR_GREEN "Child process has terminated\n" ANSI_COLOR_RESET);
+
+                // Sending a SIGKILL signal to the child process
+
+                if (kill(pid, SIGKILL) == 0)
+                {
+                    printf(ANSI_COLOR_GREEN "Sent SIGKILL signal to the child process\n" ANSI_COLOR_RESET);
+                }
+                else
+                {
+                    perror(ANSI_COLOR_RED "kill" ANSI_COLOR_RESET);
+                }
             }
         }
     }
 
     return 0;
 }
-
