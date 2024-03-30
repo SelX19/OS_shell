@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <signal.h>
 
 // defining ANSI color codes
 
@@ -84,7 +85,7 @@ void rainbow_command(char **args)
 {
     if (args[1] == NULL)
     {
-        fprintf(stderr, "Usage: rainbow [filename]\n");
+        fprintf(stderr, ANSI_COLOR_MAGENTA "Usage: " ANSI_COLOR_RESET ANSI_COLOR_GREEN "rainbow [filename]\n");
         return;
     }
 
@@ -109,7 +110,7 @@ void cd(char **args)
 {
     if (args[1] == NULL)
     {
-        fprintf(stderr, ANSI_COLOR_GREEN "Usage: cd [directory]\n" ANSI_COLOR_RESET);
+        fprintf(stderr, ANSI_COLOR_MAGENTA "Usage: " ANSI_COLOR_RESET ANSI_COLOR_GREEN "cd [directory]\n");
     }
     else
     {
@@ -122,7 +123,7 @@ void cd(char **args)
 
 void exit_shell()
 {
-    printf(ANSI_COLOR_GREEN "Exiting shell.\n" ANSI_COLOR_RESET);
+    printf(ANSI_COLOR_MAGENTA "Exiting shell.\n" ANSI_COLOR_RESET);
     exit(0);
 }
 
@@ -151,7 +152,7 @@ void list_files(char **args)
 
 void remove_file(char **args) {
     if (args[1] == NULL) {
-        fprintf(stderr, "Usage: rm [filename]\n");
+        fprintf(stderr, ANSI_COLOR_MAGENTA "Usage: " ANSI_COLOR_RESET ANSI_COLOR_GREEN "rm [filename]\n");
         return;
     }
     if (remove(args[1]) != 0) {
@@ -161,7 +162,7 @@ void remove_file(char **args) {
 
 void cat_file(char **args) {
     if (args[1] == NULL) {
-        fprintf(stderr, "Usage: cat [filename]\n");
+        fprintf(stderr, ANSI_COLOR_MAGENTA "Usage: " ANSI_COLOR_RESET ANSI_COLOR_GREEN "cat [filename]\n");
         return;
     }
     FILE *file = fopen(args[1], "r");
@@ -182,7 +183,7 @@ void clear_screen() {
 
 void cowsay_message(char **args) {
     if (args[1] == NULL) {
-        fprintf(stderr, "Usage: cowsay [message]\n");
+        fprintf(stderr, ANSI_COLOR_MAGENTA "Usage: " ANSI_COLOR_RESET ANSI_COLOR_GREEN "cowsay [message]\n");
         return;
     }
     printf(" _____\n< %s >\n ----- \n        \\   ^__^\n         \\  (oo)\\_______\n            (__)\\       )\\/\\\n                ||----w |\n                ||     ||\n", args[1]);
