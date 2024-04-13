@@ -4,10 +4,6 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <signal.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <errno.h>
 
 // defining ANSI color codes
 
@@ -193,10 +189,11 @@ void cowsay_message(char **args) {
     printf(" _____\n< %s >\n ----- \n        \\   ^__^\n         \\  (oo)\\_______\n            (__)\\       )\\/\\\n                ||----w |\n                ||     ||\n", args[1]);
 }
 
-void execute_command_pipe(char **args) {
+void execute_command(char **args) {
     // Check if the command contains redirection
+    int i;
     int redirect_index = -1;
-    for (int i = 0; args[i] != NULL; i++) {
+    for (i = 0; args[i] != NULL; i++) {
         if (strcmp(args[i], ">") == 0) {
             redirect_index = i;
             break;
@@ -207,13 +204,7 @@ void execute_command_pipe(char **args) {
         // Output redirection detected
         char *output_filename = args[redirect_index + 1];
         args[redirect_index] = NULL; // Null terminate the command before '>'
-
-        // Check if the command itself needs to be redirected
-        if (redirect_index == 0) {
-            fprintf(stderr, "Invalid command for redirection\n");
-            exit(EXIT_FAILURE);
-        }
-
+        
         // Fork a child process
         pid_t pid = fork();
         if (pid == -1) {
@@ -221,47 +212,17 @@ void execute_command_pipe(char **args) {
             exit(EXIT_FAILURE);
         } else if (pid == 0) {
             // Child process: open the output file
-            int fd = open(output_filename, O_WRONLY | O_CREAT | O_TRUNC, 0666);
-            if (fd == -1) {
-                perror("open");
+            FILE *output_file = freopen(output_filename, "w", stdout);
+            if (output_file == NULL) {
+                perror("freopen");
                 exit(EXIT_FAILURE);
             }
 
-            // Redirect stdout to the file descriptor
-            if (dup2(fd, STDOUT_FILENO) == -1) {
-                perror("dup2");
+            // Execute the command
+            if (execvp(args[0], args) == -1) {
+                perror("execvp");
                 exit(EXIT_FAILURE);
             }
-
-            // Close the file descriptor as it's no longer needed
-            close(fd);
-
-            // Execute the command using popen
-            char *command = args[0];
-            args[0] = "cowsay";
-            FILE *pipe = popen(command, "r");
-            if (pipe == NULL) {
-                perror("popen");
-                exit(EXIT_FAILURE);
-            }
-
-            // Read from the pipe and write to the file
-            char buffer[4096];
-            size_t bytes_read;
-            while ((bytes_read = fread(buffer, 1, sizeof(buffer), pipe)) > 0) {
-                if (write(STDOUT_FILENO, buffer, bytes_read) != bytes_read) {
-                    perror("write");
-                    exit(EXIT_FAILURE);
-                }
-            }
-
-            // Close the pipe
-            if (pclose(pipe) == -1) {
-                perror("pclose");
-                exit(EXIT_FAILURE);
-            }
-
-            exit(EXIT_SUCCESS);
         } else {
             // Parent process: wait for the child to finish
             int status;
@@ -276,6 +237,7 @@ void execute_command_pipe(char **args) {
     }
 }
 
+
 // Mapping of built-in functions to their names
 char *built_in_function_names[] = {
     "cd",
@@ -286,7 +248,7 @@ char *built_in_function_names[] = {
     "cat",
     "clear",
     "cowsay",
-    "pipeit"};
+    "pipe"};
 
 void (*built_in_functions[])(char **) = {
     &cd,
@@ -297,7 +259,7 @@ void (*built_in_functions[])(char **) = {
     &cat_file,
     &clear_screen,
     &cowsay_message,
-    &execute_command_pipe};
+    &execute_command};
 
 int main(void)
 {
@@ -408,3 +370,4 @@ int main(void)
 
     return 0;
 }
+
